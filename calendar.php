@@ -1,5 +1,4 @@
-
-        <?php
+<?php
         header('Content-Type: application/json');
 		$tux = "";
         if(isset($_GET['param'])){
@@ -52,5 +51,3 @@ function icsAJson($temp){
 	}
 	return ($salida);
 }
-
-        ?>
