@@ -4,7 +4,7 @@
 include 'conexiondb.php';
 
 function cargarFeed() {
-    $urls_rss = consulta("SELECT * FROM fuente;","dbname = Feed_UNCo");
+    $urls_rss = consulta("SELECT * FROM fuente;","dbname = FeedUncoma");
     while ($row = pg_fetch_row($urls_rss)) {
         $rss_tags = array(
             'title',
@@ -23,12 +23,12 @@ function cargarFeed() {
             $link = $arreglo['link'];
             $fecha = strftime("%Y-%m-%d %H:%M:%S", strtotime($arreglo['pubDate']));
             $autor = $arreglo['author'];
-            $prueba= consulta("SELECT id_noticia FROM noticia WHERE titulo ='$titulo' and fecha='$fecha' and id_fuente=$row[0];", "dbname = Feed_UNCo");
+            $prueba= consulta("SELECT id_noticia FROM noticia WHERE titulo ='$titulo' and fecha='$fecha' and id_fuente=$row[0];", "dbname = FeedUncoma");
             $row2=pg_fetch_row($prueba);
             if(empty($row2[0])){
                 echo $row2[0];
                 echo "entro";
-                consulta("INSERT INTO noticia (titulo, copete, link, fecha,  autor, id_fuente) VALUES ( '$titulo', '$copete', '$link', '$fecha', '$autor', $row[0])", $dbname="dbname = Feed_UNCo");
+                consulta("INSERT INTO noticia (titulo, copete, link, fecha,  autor, id_fuente) VALUES ( '$titulo', '$copete', '$link', '$fecha', '$autor', $row[0])", $dbname="dbname = FeedUncoma");
             }
 
             //consulta("INSERT INTO noticia (titulo, copete, link, fecha,  autor, id_fuente) VALUES ( '$titulo', '$copete', '$link', '$fecha', '$autor', $row[0])", $dbname="dbname = Feed_UNCo");
@@ -66,10 +66,10 @@ function rss_to_array($tag, $array, $url) {
 
 function mostrarFeed() {
     $muestra = "";
-    $fuentes = consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = Feed_UNCo");
+    $fuentes = consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = FeedUncoma");
     while ($row = pg_fetch_row($fuentes)) {
         $noticias = consulta("SELECT n.id_noticia, n.titulo, n.copete, 
-         n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=" . $row[0] . " ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = Feed_UNCo");
+         n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=" . $row[0] . " ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = FeedUncoma");
         $muestra.="<h2><a href='" . $row[3] . "'>" . $row[1] . "</a></h2>";
         while ($row1 = pg_fetch_row($noticias)) {
             $muestra.= "<h4>" . $row1[1] . "</h4><p>" . $row1[2] . "<br>Autor:" . $row1[5] . "</p><a href='" . $row1[3] . "'>Ver más</a>";
@@ -86,13 +86,13 @@ function mostrarFeed() {
 
 function consultaJson() {
     $json = array();
-    $fuentes = consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = Feed_UNCo");
+    $fuentes = consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = FeedUncoma");
     $i = 0;
     while ($row = pg_fetch_array($fuentes)) {
         //print_r($row);
         $json[$i] = $row;
         $j = 0;
-        $noticias = consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=" . $row['id_fuente'] . " ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = Feed_UNCo");
+        $noticias = consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=" . $row['id_fuente'] . " ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = FeedUncoma");
         while ($row2 = pg_fetch_array($noticias)) {
 //            print_r($row2[1]."\n");
             $json[$i][$j] = $row2;
@@ -110,12 +110,12 @@ function consultaJson() {
 
 function generarJson() {
     
-    $fuentes=consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = Feed_UNCo");
+    $fuentes=consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = FeedUncoma");
     $arr =array('fuentes'=> array());
     $i=0;
     while($row=  pg_fetch_row($fuentes)){
         $arr['fuentes'][$i]=array('nombre' => $row[1], 'pagina'=>$row[3], 'noticias'=>array()) ;
-        $noticias=consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=".$row[0]." ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = Feed_UNCo");
+        $noticias=consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=".$row[0]." ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = FeedUncoma");
         $j=0;
         while($row2 = pg_fetch_row($noticias)){
             $arr['fuentes'][$i]['noticias'][$j]=array('titulo'=>$row2[1], 'copete'=>html_entity_decode($row2[2]), 'url'=>$row2[3], 'fecha'=>$row2[4], 'autor'=>$row2[5]);
