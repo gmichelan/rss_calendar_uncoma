@@ -1,10 +1,11 @@
 <?php
 
 /* Métodos para cargar noticias rss en bd utilizando postgres y PHP */
+header("Access-Control-Allow-Origin: *");
 include 'conexiondb.php';
-
 function cargarFeed() {
     $urls_rss = consulta("SELECT * FROM fuente;","dbname = FeedUncoma");
+    echo $urls_rss;
     while ($row = pg_fetch_row($urls_rss)) {
         $rss_tags = array(
             'title',

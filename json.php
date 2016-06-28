@@ -1,4 +1,5 @@
 <?php
+header("Access-Control-Allow-Origin: *");
 include'rss_bd_server.php';
 cargarFeed();
 //mostrarFeed();
