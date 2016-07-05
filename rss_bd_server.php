@@ -5,8 +5,7 @@
 include 'conexiondb.php';
 function cargarFeed() {
     $urls_rss = consulta("SELECT * FROM fuente;","dbname = FeedUncoma");
-    echo $urls_rss;
-    while ($row = pg_fetch_row($urls_rss)) {
+    while ($row = pg_fetch_row($urls_rss))  {
         $rss_tags = array(
             'title',
             'link',
@@ -17,7 +16,7 @@ function cargarFeed() {
         $rss_item_tag = 'item';
         $rss_url = $row[2];
         $rssfeed = rss_to_array($rss_item_tag, $rss_tags, $rss_url);
-
+ 
         foreach ($rssfeed AS $arreglo) {
             $titulo = $arreglo['title'];
             $copete = html_entity_decode(strip_tags($arreglo['description']));
@@ -28,7 +27,6 @@ function cargarFeed() {
             $row2=pg_fetch_row($prueba);
             if(empty($row2[0])){
                 echo $row2[0];
-                echo "entro";
                 consulta("INSERT INTO noticia (titulo, copete, link, fecha,  autor, id_fuente) VALUES ( '$titulo', '$copete', '$link', '$fecha', '$autor', $row[0])", $dbname="dbname = FeedUncoma");
             }
 
