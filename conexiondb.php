@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+//header("Access-Control-Allow-Origin: *");
  function consulta($query, $dbname="dbname = asi_es_unco"){
     if($dbname=="dbname = asi_es_unco"){
         //echo "entro en ".$dbname;
