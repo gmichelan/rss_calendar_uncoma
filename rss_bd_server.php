@@ -114,7 +114,7 @@ function generarJson() {
     $i=0;
     while($row=  pg_fetch_row($fuentes)){
         $arr['fuentes'][$i]=array('nombre' => $row[1], 'pagina'=>$row[3], 'noticias'=>array()) ;
-        $noticias=consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=".$row[0]." ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = FeedUncoma");
+        $noticias=consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=".$row[0]." ORDER BY  n.fecha DESC LIMIT  3", $dbname="dbname = FeedUncoma");
         $j=0;
         while($row2 = pg_fetch_row($noticias)){
             $arr['fuentes'][$i]['noticias'][$j]=array('titulo'=>$row2[1], 'copete'=>html_entity_decode($row2[2]), 'url'=>$row2[3], 'fecha'=>$row2[4], 'autor'=>$row2[5]);
