@@ -23,11 +23,17 @@ function cargarFeed() {
             $link = $arreglo['link'];
             $fecha = strftime("%Y-%m-%d %H:%M:%S", strtotime($arreglo['pubDate']));
             $autor = $arreglo['author'];
+            //preg_match_all('/<img[^>]+>/i',$arreglo['description'], $stringImg); 
+            preg_match_all('/src=("[^"]*")/i',$arreglo['description'], $stringImg); //obtengo solo los src de la descripción
+            preg_match_all('/("[^"]*")/i', $stringImg[0][0], $matches);//obtengo el link del primer src de la descripción
+            //print_r($matches);
+            //$imagen=$matches[0][0];
+            $imagen=str_replace('"','',$matches[0][0]);  //quito las comillas dobles del link de la imagen
+            //print_r($imagen);
             $prueba= consulta("SELECT id_noticia FROM noticia WHERE titulo ='$titulo' and fecha='$fecha' and id_fuente=$row[0];", "dbname = FeedUncoma");
             $row2=pg_fetch_row($prueba);
             if(empty($row2[0])){
-                echo $row2[0];
-                consulta("INSERT INTO noticia (titulo, copete, link, fecha,  autor, id_fuente) VALUES ( '$titulo', '$copete', '$link', '$fecha', '$autor', $row[0])", $dbname="dbname = FeedUncoma");
+                consulta("INSERT INTO noticia (titulo, copete, link, fecha,  autor, id_fuente, imagen) VALUES ( '$titulo', '$copete', '$link', '$fecha', '$autor', $row[0],'$imagen')", $dbname="dbname = FeedUncoma");
             }
 
             //consulta("INSERT INTO noticia (titulo, copete, link, fecha,  autor, id_fuente) VALUES ( '$titulo', '$copete', '$link', '$fecha', '$autor', $row[0])", $dbname="dbname = Feed_UNCo");
@@ -50,7 +56,7 @@ function rss_to_array($tag, $array, $url) {
             if ($value !== 'description') {
                 $items[$value] = $node->getElementsByTagName($value)->item(0)->nodeValue;
             } else {
-                $cadena = strip_tags($node->getElementsByTagName($value)->item(0)->nodeValue, '<span><div>');
+                $cadena = strip_tags($node->getElementsByTagName($value)->item(0)->nodeValue, '<span><div><img>');
                 $items[$value] = $cadena;
             }
         }
@@ -107,6 +113,7 @@ function consultaJson() {
  
 }
 
+//La qeu funciona hasta la fecha 20 de agosto del 2016
 function generarJson() {
     
     $fuentes=consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = FeedUncoma");
@@ -131,3 +138,27 @@ function generarJson() {
     echo json_encode($arr);
 //   
 }
+//function generarJson() {
+//    
+//    $fuentes=consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = FeedUncoma");
+//    $arr =array('fuentes'=> array());
+//    $i=0;
+//    while($row=  pg_fetch_row($fuentes)){
+//        $arr['fuentes'][$i]=array('nombre' => $row[1], 'pagina'=>$row[3], 'noticias'=>array()) ;
+//        $noticias=consulta("SELECT n.id_noticia, n.id_fuente, n.titulo, n.copete, n.link, n.fecha FROM noticia as n WHERE n.id_fuente=".$row[0]." ORDER BY  n.fecha DESC LIMIT  3", $dbname="dbname = FeedUncoma");
+//        $j=0;
+//        while($row2 = pg_fetch_row($noticias)){
+//            $arr['fuentes'][$i]['noticias'][$j]=array('titulo'=>$row2[1], 'copete'=>html_entity_decode($row2[2]), 'url'=>$row2[3], 'fecha'=>$row2[4]);
+//            $j++;
+//        }
+//        pg_free_result($noticias);
+//        $i++;
+//    }
+////    $arr = array('fuentes' => array(array("nombre" => "prensa", "url" => 2, "noticias" => array(
+////             array("titulo" => "titulo1", "copete" => "cop", "url" => "das"),array("titulo" => "titulo1", "copete" => "cop", "url" => "das"))),
+////        array("nombre" => "fiuncoma", "url" => 2, "noticias" => array(
+////            array("titulo" => "titulo1", "copete" => "cop", "url" => "das"), array("titulo" => "titulo1", "copete" => "cop", "url" => "das")))));
+//
+//    echo json_encode($arr);
+////   
+//}
