@@ -74,7 +74,7 @@ function mostrarFeed() {
     $fuentes = consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = FeedUncoma");
     while ($row = pg_fetch_row($fuentes)) {
         $noticias = consulta("SELECT n.id_noticia, n.titulo, n.copete, 
-         n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=" . $row[0] . " ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = FeedUncoma");
+         n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=" . $row[0] . " ORDER BY  n.fecha DESC LIMIT  3", $dbname="dbname = FeedUncoma");
         $muestra.="<h2><a href='" . $row[3] . "'>" . $row[1] . "</a></h2>";
         while ($row1 = pg_fetch_row($noticias)) {
             $muestra.= "<h4>" . $row1[1] . "</h4><p>" . $row1[2] . "<br>Autor:" . $row1[5] . "</p><a href='" . $row1[3] . "'>Ver más</a>";
@@ -97,7 +97,7 @@ function consultaJson() {
         //print_r($row);
         $json[$i] = $row;
         $j = 0;
-        $noticias = consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=" . $row['id_fuente'] . " ORDER BY  n.id_noticia DESC LIMIT  3", $dbname="dbname = FeedUncoma");
+        $noticias = consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=" . $row['id_fuente'] . " ORDER BY  n.fecha DESC LIMIT  3", $dbname="dbname = FeedUncoma");
         while ($row2 = pg_fetch_array($noticias)) {
 //            print_r($row2[1]."\n");
             $json[$i][$j] = $row2;
@@ -113,31 +113,7 @@ function consultaJson() {
  
 }
 
-//La qeu funciona hasta la fecha 20 de agosto del 2016
-function generarJson() {
-    
-    $fuentes=consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = FeedUncoma");
-    $arr =array('fuentes'=> array());
-    $i=0;
-    while($row=  pg_fetch_row($fuentes)){
-        $arr['fuentes'][$i]=array('nombre' => $row[1], 'pagina'=>$row[3], 'noticias'=>array()) ;
-        $noticias=consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=".$row[0]." ORDER BY  n.fecha DESC LIMIT  3", $dbname="dbname = FeedUncoma");
-        $j=0;
-        while($row2 = pg_fetch_row($noticias)){
-            $arr['fuentes'][$i]['noticias'][$j]=array('titulo'=>$row2[1], 'copete'=>html_entity_decode($row2[2]), 'url'=>$row2[3], 'fecha'=>$row2[4], 'autor'=>$row2[5]);
-            $j++;
-        }
-        pg_free_result($noticias);
-        $i++;
-    }
-//    $arr = array('fuentes' => array(array("nombre" => "prensa", "url" => 2, "noticias" => array(
-//             array("titulo" => "titulo1", "copete" => "cop", "url" => "das"),array("titulo" => "titulo1", "copete" => "cop", "url" => "das"))),
-//        array("nombre" => "fiuncoma", "url" => 2, "noticias" => array(
-//            array("titulo" => "titulo1", "copete" => "cop", "url" => "das"), array("titulo" => "titulo1", "copete" => "cop", "url" => "das")))));
-
-    echo json_encode($arr);
-//   
-}
+////La qeu funciona hasta la fecha 20 de agosto del 2016
 //function generarJson() {
 //    
 //    $fuentes=consulta("SELECT id_fuente, nombre, url, pagina FROM fuente;", $dbname="dbname = FeedUncoma");
@@ -145,10 +121,10 @@ function generarJson() {
 //    $i=0;
 //    while($row=  pg_fetch_row($fuentes)){
 //        $arr['fuentes'][$i]=array('nombre' => $row[1], 'pagina'=>$row[3], 'noticias'=>array()) ;
-//        $noticias=consulta("SELECT n.id_noticia, n.id_fuente, n.titulo, n.copete, n.link, n.fecha FROM noticia as n WHERE n.id_fuente=".$row[0]." ORDER BY  n.fecha DESC LIMIT  3", $dbname="dbname = FeedUncoma");
+//        $noticias=consulta("SELECT n.id_noticia, n.titulo, n.copete, n.link, n.fecha, n.autor FROM noticia as n WHERE n.id_fuente=".$row[0]." ORDER BY  n.fecha DESC LIMIT  3", $dbname="dbname = FeedUncoma");
 //        $j=0;
 //        while($row2 = pg_fetch_row($noticias)){
-//            $arr['fuentes'][$i]['noticias'][$j]=array('titulo'=>$row2[1], 'copete'=>html_entity_decode($row2[2]), 'url'=>$row2[3], 'fecha'=>$row2[4]);
+//            $arr['fuentes'][$i]['noticias'][$j]=array('titulo'=>$row2[1], 'copete'=>html_entity_decode($row2[2]), 'url'=>$row2[3], 'fecha'=>$row2[4], 'autor'=>$row2[5]);
 //            $j++;
 //        }
 //        pg_free_result($noticias);
@@ -162,3 +138,15 @@ function generarJson() {
 //    echo json_encode($arr);
 ////   
 //}
+function generarJson() {
+    
+    $fuentes=consulta("SELECT * FROM ordenar() AS o ORDER BY o.fecha DESC;", $dbname="dbname = FeedUncoma");
+    $arr =array('noticias'=> array());
+    $i=0;
+    while($row=  pg_fetch_row($fuentes)){
+        $arr['noticias'][$i]=array('nombre' => $row[0], 'pagina'=>$row[1], 'titulo'=>$row[2], 'copete'=>$row[3], 'url'=>$row[4]);
+        $i++;
+    }
+    pg_free_result($fuentes);
+    echo json_encode($arr);
+}
